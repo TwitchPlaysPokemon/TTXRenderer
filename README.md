@@ -2,12 +2,13 @@ Teletext renderer
 =================
 
 This is a little Teletext Level 1.5 (ETSI ETS 300 706) renderer I threw together in my spare time.
+It has been modified by TPP to export the rendered pages as images.
 
 Installation
 ------------
 
   - Install the fonts in `~/.fonts` (symlinking may also work)
-  - Install Pygame
+  - Install Pygame and Pillow
   - Run the scripts
 
 Licence

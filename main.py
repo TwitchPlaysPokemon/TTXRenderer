@@ -1,112 +1,110 @@
 #!/usr/bin/env python3
-
-from datetime import datetime
+import logging
+from datetime import datetime, timezone
 import os
 import pygame
+import glob
+from PIL import Image
 
-from ViewtextRenderer import *
-from testpages import CeefaxEngtest, ETS300706Test, LoadEP1, LoadRaw
-
-
-# Set to True to force rescaling of the image regardless of screen size
-# TODO - allow scaling to be set to NONE, FIT or STRETCH
-FORCE_SCALE=False
-
-# Font size
-FONT_SIZE = 30
-# Antialiasing -- needs to be on or MODE7 will screw up
-FONT_AA   = True
-
-# Display timing -- flash on in seconds
-T_FLASH_ON  = 1.0
-# Display timing -- flash off in seconds
-T_FLASH_OFF = 0.3
-
-# Fullscreen
-FULLSCREEN = False
-
-# Hold pages up for this many seconds
-PAGEDELAY = 10
+from ViewtextRenderer import ViewtextRenderer
+from testpages import CeefaxEngtest, LoadRaw
 
 
-# page list
-pages = []
-pages.append([196, CeefaxEngtest()])
-pages.append([197, ETS300706Test()])
-pages.append([198, LoadRaw('pages/P198-0001.bin')])
-pages.append([366, LoadRaw('pages/trudge.bin')])
-pages.append([535, LoadRaw('pages/SchedSat-001.bin')])
-pages.append([535, LoadRaw('pages/SchedSat-002.bin')])
-pages.append([535, LoadRaw('pages/SchedSat-003.bin')])
-pages.append([367, LoadRaw('pages/conbook.bin')])
-pages.append([536, LoadRaw('pages/SchedSun-001.bin')])
-pages.append([536, LoadRaw('pages/SchedSun-002.bin')])
-pages.append([536, LoadRaw('pages/SchedSun-003.bin')])
-pages.append([621, LoadRaw('pages/contact.bin')])
+# Set to True to force rescaling of the image regardless of screen size.
+# TODO - allow scaling to be set to NONE, FIT or STRETCH.
+force_scale = False
 
+# Font size.
+font_size = 30
+# Antialiasing -- needs to be on or MODE7 will screw up.
+font_aa = False
 
-# initialise the display
-print("displayInit")
+# Display timing -- flash on in seconds.
+t_flash_on = 1.0
+# Display timing -- flash off in seconds.
+t_flash_off = 0.3
+
+# Fullscreen.
+fullscreen = False
+
+# Hold pages up for this many seconds.
+page_delay = 1
+
+# Get directory of this script.
+script_dir = os.path.dirname(os.path.realpath(__file__))
+output_dir = os.path.join(script_dir, "output")
+
+# Get a list of files from the pages directory.
+pages_dir = os.path.join(script_dir, "pages")
+page_filenames = os.listdir(pages_dir)
+
+# Page list.
+pages = [
+    [899, CeefaxEngtest()],
+]
+for page_filename in page_filenames:
+    page_number = int(page_filename[1:4])
+    pages.append([page_number, LoadRaw(f"{pages_dir}/{page_filename}")])
+
+# Initialise the display.
+logging.info("displayInit")
 pygame.display.init()
 pygame.display.set_caption('Viewtext renderer')
 
-# hide the mouse cursor
-pygame.mouse.set_visible(False)
+# Hide the mouse cursor.
+# pygame.mouse.set_visible(False)
 
-# open the screen
-if FULLSCREEN:
+# Open the screen.
+if fullscreen:
     size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
-    print("Framebuffer size: %d x %d" % (size[0], size[1]))
+    logging.info("Framebuffer size: %d x %d" % (size[0], size[1]))
     lcd = pygame.display.set_mode(size, pygame.FULLSCREEN)
 else:
-    #size = (720, 576)
-    size = (1280,768)
+    size = (720, 576)
+    # size = (1280,768)
     lcd = pygame.display.set_mode(size, 0)
 
-print("modeset done")
+logging.info("modeset done")
 
-# TODO background image
-lcd.fill((0,0,0))
+# TODO background image.
+lcd.fill((0, 0, 0))
 
-# initialise fonts
-print("fontInit")
+# Initialise fonts.
+logging.info("fontInit")
 pygame.font.init()
 
-# initialise Viewdata/Teletext renderer
-print("viewtextInit")
-#vtr = ViewtextRenderer(font="fonts/MODE7GX0.TTF", fontsize=FONT_SIZE, antialias=FONT_AA)
-vtr = ViewtextRenderer(font="bedstead", fontsize=FONT_SIZE, antialias=FONT_AA)
+# Initialise Viewdata/Teletext renderer.
+logging.info("viewtextInit")
+# vtr = ViewtextRenderer(font="fonts/MODE7GX0.TTF", fontsize=FONT_SIZE, antialias=FONT_AA)
+vtr = ViewtextRenderer(font="bedstead", fontsize=font_size, antialias=font_aa)
 
+# --- Set up transform rectangle ---
 
-# --- set up transform rectangle ---
-
-# do an initial render
+# Do an initial render.
 pagenumber, page = pages[0]
-main,flash = vtr.render(page)
+main, flash = vtr.render(page)
 
-# rescale the Teletext image if it's too large for the screen
+# Rescale the Teletext image if it's too large for the screen.
 r = main.get_rect()
 lr = lcd.get_rect()
-if (lr[0] < r[0]) or (lr[1] < r[1]) or FORCE_SCALE:
-    # resize (scale down) to fit the screen
+if (lr[0] < r[0]) or (lr[1] < r[1]) or force_scale:
+    # Resize (scale down) to fit the screen.
     r = main.get_rect().fit(lcd.get_rect())
     main = pygame.transform.smoothscale(main, (r.width, r.height))
     flash = pygame.transform.smoothscale(flash, (r.width, r.height))
 else:
-    # no resize required
+    # No resize required.
     r = main.get_rect()
 
-# centre the Teletext image on the screen
-r.center=(size[0]/2, size[1]/2)
+# Centre the Teletext image on the screen.
+r.center = (size[0] / 2, size[1] / 2)
 
+# Set up 100ms tick.
+evt_tick = pygame.USEREVENT + 1
+ticks_per_sec = 10
+pygame.time.set_timer(evt_tick, (1000 // ticks_per_sec))
 
-# set up 100ms tick
-EVT_TICK=pygame.USEREVENT+1
-TICKSPERSEC = 10
-pygame.time.set_timer(EVT_TICK, (1000//TICKSPERSEC))
-
-
-# main display loop
+# Main display loop.
 quit = False
 tick = 0
 pageidx = 0
@@ -117,60 +115,80 @@ while not quit:
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            # quit (usually X11 only)
+            # Quit (usually X11 only).
             quit = True
 
         elif event.type == pygame.KEYDOWN:
-            # keypress
+            # Keypress.
             if event.key == pygame.K_ESCAPE:
                 quit = True
 
-        elif event.type == EVT_TICK:
-            # user defined event: timer tick
+        elif event.type == evt_tick:
+            # User defined event: timer tick.
             tick += 1
 
-    # if the tick hasn't incremented, don't bother doing anything
-    if (tick <= lasttick):
+    # If the tick hasn't incremented, don't bother doing anything.
+    if tick <= lasttick:
         continue
 
-    if (tick % (PAGEDELAY*TICKSPERSEC)) == 0:
-        # pick the next page
+    #if (tick % (page_delay * ticks_per_sec)) == 0:
+    if True:
+        # Pick the next page.
         pagenumber, page = pages[pageidx]
         pageidx += 1
         if pageidx >= len(pages):
             pageidx = 0
+            quit = True
         newpage = True
 
-    if (tick % TICKSPERSEC) == 0 or newpage:
+    if (tick % ticks_per_sec) == 0 or newpage:
         # Top of second. Update the header row and force a display update.
         now = datetime.now()
 
-        page[0]  = b'  P%03d  ' % pagenumber            # decoder reserved (8 chars) -- requested page number
-        page[0] += b'\x04\x1d\x03Furcfax \x07\x1c '     # header bar
-        page[0] += b'%03d ' % pagenumber                 # page number
-        page[0] += bytes(now.strftime("%b%d"), 'ascii')     # date
-        page[0] += b'\x03'      # yellow text for clock
-        page[0] += bytes(now.strftime("%H:%M/%S"), 'ascii') # time
+        page[0] = b'  P%03d  ' % pagenumber  # Decoder reserved (8 chars).
+        page[0] += b'TELETEXT '  # Header bar.
+        page[0] += b'%03d ' % pagenumber
 
-        main,flash = vtr.render(page)
+        #page[24] = b'\x03Dial the number in yellow to view page.'
+        # page[24] = b'\x03Dial yellow number to see, P100 is home'
+        #page[24] = b'\x03Dial yellow numbers (P100) to view page'
 
-    ## --- flash display loop ---
+        page[0] += bytes(
+            datetime.now(timezone.utc)
+                .isoformat()
+                .replace("T", " ")
+                .replace("Z", ""),
+            'ascii',
+        )
 
-    if (tick % ((T_FLASH_OFF + T_FLASH_ON) * TICKSPERSEC)) == 0:
-        # Start of flash time period -- blit the main image
+        main, flash = vtr.render(page)
         lcd.blit(main, r)
         pygame.display.update()
-        #pygame.image.save(main, "teletext_new.png")
-        #os.replace("teletext_new.png", "teletext.png")
+        done_page_path = os.path.join(output_dir, f"{pagenumber}.png")
+        pygame.image.save(main, done_page_path)
 
-    elif (tick % ((T_FLASH_OFF + T_FLASH_ON) * TICKSPERSEC)) == (T_FLASH_ON * TICKSPERSEC):
-        # Change from Main (flashing text displayed) to Flash
-        # (flashing text hidden)
-        lcd.blit(flash, r)
-        pygame.display.update()
-        #pygame.image.save(flash, "teletext_new.png")
-        #os.replace("teletext_new.png", "teletext.png")
-
-
-# shut down pygame on exit
 pygame.quit()
+
+# Combine the images into a tiled image.
+def combine_images(output_dir):
+    image_paths = sorted(glob.glob(os.path.join(output_dir, "*.png")))
+    images = [Image.open(image_path) for image_path in image_paths]
+
+    if not images:
+        return
+
+    # Assuming all images are the same size
+    img_width, img_height = images[0].size
+    grid_width = int(len(images) ** 0.5)
+    grid_height = (len(images) + grid_width - 1) // grid_width
+
+    combined_image = Image.new('RGB', (grid_width * img_width, grid_height * img_height))
+
+    for idx, image in enumerate(images):
+        x = (idx % grid_width) * img_width
+        y = (idx // grid_width) * img_height
+        combined_image.paste(image, (x, y))
+
+    combined_image.save(os.path.join(output_dir, "combined_image.png"))
+
+combine_images(output_dir)

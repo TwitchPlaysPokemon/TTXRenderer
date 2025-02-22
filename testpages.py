@@ -1,3 +1,8 @@
+import base64
+import sys
+from urllib.parse import urlparse, unquote
+
+
 def DeTTX(s):
     """
     Convert Hexadecimal Teletext code (from the Galax TTX editor) into a bytearray
@@ -9,6 +14,7 @@ def DeTTX(s):
     b = [a[i:i+40] for i in range(0, len(a), 40)]
 
     return b
+
 
 def LoadEP1(filename):
     """
@@ -31,6 +37,7 @@ def LoadEP1(filename):
     data_lines = [data[i:i+40] for i in range(0, len(data), 40)]
     return data_lines
 
+
 def LoadRaw(filename):
     """
     Load raw files from edit.tf (Raw 0x00-0x7f)
@@ -52,7 +59,7 @@ def LoadRaw(filename):
         # raw data with CRLF line endings
         data_lines = [data[i:i+40] for i in range(0, len(data), 42)]
     else:
-        raise IOError("Invalid Teletext-Raw file")
+        raise IOError(f"Invalid Teletext-Raw file: {filename}")
 
     return data_lines
 
