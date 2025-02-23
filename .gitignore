@@ -3,6 +3,7 @@ venv
 *~
 .*.sw?
 pages/
+build/
 *.png
 *.egg
 *.egg-info
