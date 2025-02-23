@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 parser = argparse.ArgumentParser(
-    prog="TTXRenderer",
+    prog="ttxrenderer",
     description="Converts teletext pages to images")
 parser.add_argument("pages_dir")
 parser.add_argument("out_dir")

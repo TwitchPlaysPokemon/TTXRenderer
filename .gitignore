@@ -4,3 +4,5 @@ venv
 .*.sw?
 pages/
 *.png
+*.egg
+*.egg-info
