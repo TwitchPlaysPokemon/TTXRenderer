@@ -2,6 +2,7 @@ import pygame
 import pygame.freetype
 import pygame.ftfont
 import os
+import importlib.resources
 
 class ViewtextRenderer:
     # Viewtext screen area in characters
@@ -23,16 +24,18 @@ class ViewtextRenderer:
             (255,   255,    255)    # White
             )
 
-    def __init__(self, fontpath="fonts/", font="bedstead", fontsize=20, antialias=True):
+    def __init__(self, font="bedstead", fontsize=20, antialias=True):
         pygame.freetype.init()
+
+        resources = importlib.resources.files(__package__)
 
         # Load the font
         if font == "bedstead":
-            self._font = pygame.ftfont.Font(os.path.join(fontpath, "bedstead.otf"), fontsize)
-            self._font2 = pygame.ftfont.Font(os.path.join(fontpath, "bedstead-ultracondensed.otf"), fontsize*2)
+            self._font = pygame.ftfont.Font(resources.joinpath("fonts/bedstead.otf"), fontsize)
+            self._font2 = pygame.ftfont.Font(resources.joinpath("fonts/bedstead-ultracondensed.otf"), fontsize*2)
             self.mapper = self._charmap_bedstead
         else:
-            self._font = pygame.ftfont.Font(font, fontsize)
+            self._font = pygame.ftfont.Font(resources.joinpath(font), fontsize)
             self._font2 = None
             self.mapper = self._charmap_mode7
         self._antialias = antialias
