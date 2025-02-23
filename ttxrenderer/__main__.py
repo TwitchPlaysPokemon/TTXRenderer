@@ -39,7 +39,7 @@ fullscreen = False
 page_delay = 1
 
 # Get directory of this script.
-#script_dir = os.path.dirname(os.path.realpath(__file__))
+script_dir = os.path.dirname(os.path.realpath(__file__))
 working_dir = os.path.curdir
 output_dir = os.path.join(working_dir, args.out_dir or "output")
 if not os.path.exists(output_dir):
@@ -87,7 +87,7 @@ pygame.font.init()
 # Initialise Viewdata/Teletext renderer.
 logging.info("viewtextInit")
 # vtr = ViewtextRenderer(font="fonts/MODE7GX0.TTF", fontsize=FONT_SIZE, antialias=FONT_AA)
-vtr = ViewtextRenderer(font="bedstead", fontsize=font_size, antialias=font_aa)
+vtr = ViewtextRenderer(font="bedstead", fontsize=font_size, antialias=font_aa, fontpath=os.path.join(script_dir, "fonts/"))
 
 # --- Set up transform rectangle ---
 
