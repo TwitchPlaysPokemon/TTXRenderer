@@ -14,3 +14,7 @@ jobs:
           python -m pip install git+https://github.com/TwitchPlaysPokemon/ttxrenderer.git#egg=ttxrenderer
       - name: Test render teletext
         run: python -m ttxrenderer sample_page test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: combined_image.png
+          path: test/combined_image.png
