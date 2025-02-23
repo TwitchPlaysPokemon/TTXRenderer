@@ -9,6 +9,6 @@ setup(
     author="Phil Pemberton, TPP",
     description="Converts teletext pages to images",
     url="https://github.com/TwitchPlaysPokemon/ttxrenderer",
-    include_dirs=['ttxrenderer/fonts', 'ttxrenderer/tools'],
+    package_data={'ttxrenderer': ['fonts/*']},
     include_package_data=True
 )
