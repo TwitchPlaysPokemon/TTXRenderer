@@ -14,8 +14,8 @@ import pygame
 import glob
 from PIL import Image
 
-from ViewtextRenderer import ViewtextRenderer
-from testpages import CeefaxEngtest, LoadRaw
+from .ViewtextRenderer import ViewtextRenderer
+from .testpages import CeefaxEngtest, LoadRaw
 
 
 # Set to True to force rescaling of the image regardless of screen size.
@@ -55,7 +55,7 @@ pages = [
 ]
 for page_filename in page_filenames:
     page_number = int(page_filename[1:4])
-    pages.append([page_number, LoadRaw(f"{pages_dir}/{page_filename}")])
+    pages.append([page_number, LoadRaw(os.path.normpath(f"{pages_dir}/{page_filename}"))])
 
 # Initialise the display.
 logging.info("displayInit")
