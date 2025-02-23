@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+import argparse
+parser = argparse.ArgumentParser(
+    prog="TTXRenderer",
+    description="Converts teletext pages to images")
+parser.add_argument("pages_dir")
+parser.add_argument("out_dir")
+args = parser.parse_args()
+
 import logging
 from datetime import datetime, timezone
 import os
@@ -31,11 +39,14 @@ fullscreen = False
 page_delay = 1
 
 # Get directory of this script.
-script_dir = os.path.dirname(os.path.realpath(__file__))
-output_dir = os.path.join(script_dir, "output")
+#script_dir = os.path.dirname(os.path.realpath(__file__))
+working_dir = os.path.curdir
+output_dir = os.path.join(working_dir, args.out_dir or "output")
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
 
 # Get a list of files from the pages directory.
-pages_dir = os.path.join(script_dir, "pages")
+pages_dir = os.path.join(working_dir, args.pages_dir or "pages")
 page_filenames = os.listdir(pages_dir)
 
 # Page list.
